@@ -84,11 +84,13 @@ app.MapPost("/booking/{washingMachineId}", [Authorize(AuthenticationSchemes = Jw
         return Results.BadRequest("Bad Token!");
     }
 
-    var booking = new Booking(duration);
+    var booking = new Booking();
 
     booking.Id = Guid.NewGuid();
     booking.UserEmail = userEmail;
     booking.ApartmentComplexName = appartmentName;
+    booking.Start = DateTime.UtcNow;
+    booking.End = booking.Start + TimeSpan.FromMinutes(duration);
 
     return Results.Created($"/booking/{booking.Id}", "Thank you for booking a washing machine with 'StellaTime'");
 });
