@@ -11,7 +11,7 @@
         public Guid Id { get; set; }
         public string UserEmail { get; set; }
         public string ApartmentComplexName { get; set; }
-        public DateTime Start { get; set; }
-        public DateTime End { get; set; }
+        private DateTime Start { get; set; }
+        private DateTime End { get; set; }
     }
 }
