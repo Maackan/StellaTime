@@ -13,7 +13,7 @@ namespace StellaBooking.Services
 
         public async Task<WashingMachine> GetWashingMachine(string washingMachineId)
         {
-            return await _httpClient.GetFromJsonAsync<WashingMachine>($"/");
+            return await _httpClient.GetFromJsonAsync<WashingMachine>($"/machine/{washingMachineId}");
         }
     }
 }
