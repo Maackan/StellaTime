@@ -1,5 +1,5 @@
 ﻿using StellaBooking.Models;
-
+using System.Net.Http.Headers;
 namespace StellaBooking.Services
 {
     public class WashingMachineClient
@@ -11,9 +11,14 @@ namespace StellaBooking.Services
             _httpClient = httpClient;
         }
 
-        public async Task<WashingMachine> GetWashingMachine(string washingMachineId)
+        public async Task<WashingMachine> GetWashingMachineAsync(string washingMachineId)
         {
             return await _httpClient.GetFromJsonAsync<WashingMachine>($"/machine/{washingMachineId}");
+        }
+
+        public async Task UpdateWashingMachineAsync(string washingMachineId)
+        {
+            await _httpClient.PutAsJsonAsync<UpdateWashingMachineDto>($"/machine/{washingMachineId}", new UpdateWashingMachineDto() { WashingMachineId = washingMachineId});
         }
     }
 }

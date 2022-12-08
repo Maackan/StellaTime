@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<StellaWashingMachinesContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<StellaWashingMachinesContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("AZURE")));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
@@ -32,6 +32,12 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<StellaWashingMachinesContext>();
+    db.Database.Migrate();
+}
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -42,12 +48,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
 const string USER_ROLE = "user";
 const string ADMIN_ROLE = "admin";
 
-app.MapGet("/machine/{id}", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = USER_ROLE)] async (string id, StellaWashingMachinesContext db) =>
+app.MapGet("/machine/{id}", async (string id, StellaWashingMachinesContext db) =>
 {
     var washingMachine = await db.WashingMachines.FirstOrDefaultAsync(machine => machine.Id.ToString() == id);
     
@@ -59,21 +63,23 @@ app.MapGet("/machine/{id}", [Authorize(AuthenticationSchemes = JwtBearerDefaults
     return Results.Ok(washingMachine);
 });
 
-app.MapGet("/machines", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = USER_ROLE)] async (StellaWashingMachinesContext db) =>
+app.MapGet("/machines", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = $"{USER_ROLE}, {ADMIN_ROLE}")] async (StellaWashingMachinesContext db) =>
 {
     return await db.WashingMachines.ToListAsync();
 });
 
 app.MapPost("/machine", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = ADMIN_ROLE)] async (StellaWashingMachinesContext db) => 
 {
-    
-    //var newWashingMachine = new WashingMachine() { Available = false};
 
-    await db.WashingMachines.AddAsync(new WashingMachine() { Available = false});
+    var newWashingMachine = new WashingMachine() { Available = true };
+
+    await db.WashingMachines.AddAsync(newWashingMachine);
     await db.SaveChangesAsync();
+
+    return Results.Created($"/machine/{newWashingMachine.Id}", "New washingmachine added");
 });
 
-app.MapDelete("/machine/{id}", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")] async (string id, StellaWashingMachinesContext db) =>
+app.MapDelete("/machine/{id}", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = ADMIN_ROLE)] async (string id, StellaWashingMachinesContext db) =>
 {
     var machineToDelete = await db.WashingMachines.FirstOrDefaultAsync(machine => machine.Id.ToString() == id);
 
@@ -89,7 +95,7 @@ app.MapDelete("/machine/{id}", [Authorize(AuthenticationSchemes = JwtBearerDefau
     return Results.Ok($"WashingMachine was removed successfully from the application!");
 });
 
-app.MapPut("/machine/{id}", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")] async (string id, WashingMachine machine, StellaWashingMachinesContext db) =>
+app.MapPut("/machine/{id}", async (string id, StellaWashingMachinesContext db) =>
 {
     var machineToAlter = await db.WashingMachines.FirstOrDefaultAsync(machine => machine.Id.ToString() == id);
 
@@ -98,11 +104,11 @@ app.MapPut("/machine/{id}", [Authorize(AuthenticationSchemes = JwtBearerDefaults
         return Results.NotFound("Could not find washing machine");
     }
 
-    machineToAlter.Available = machine.Available;
+    machineToAlter.Available = false;
 
     await db.SaveChangesAsync();
 
-    return Results.Ok("Product had been updated");
+    return Results.Ok("Washingmachine had been updated");
 });
 
 app.Run();

@@ -12,7 +12,7 @@ using StellaWashingMachines.Services;
 namespace StellaWashingMachines.Migrations
 {
     [DbContext(typeof(StellaWashingMachinesContext))]
-    [Migration("20221130112624_initial")]
+    [Migration("20221207132450_initial")]
     partial class initial
     {
         /// <inheritdoc />

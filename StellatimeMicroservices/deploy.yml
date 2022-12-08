@@ -1,0 +1,59 @@
+version: "3.9"
+
+services:
+  stellaauthdb:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: always
+    ports:
+      - 1433:1433
+    environment: 
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: StellaTime1!
+    volumes:
+      - ./volumes/StellaAuthDB:/var/opt/mssql/data
+
+  stellawashingmachinesdb:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: always
+    ports:
+      - 1434:1433
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: StellaTime1!
+    volumes:
+      - ./volumes/StellaWashingmachinesDB:/var/opt/mssql/data
+
+  stellabookingdb:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: always
+    ports:
+      - 1435:1433
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: StellaTime1!
+    volumes:
+      - ./volumes/PaymentDB:/var/opt/mssql/data
+
+  stellaauth:
+    image: stellaauth
+    restart: always
+    ports:
+      - 3000:80
+    depends_on:
+      - stellaauthdb
+
+  stellawashingmachines:
+    image: stellawashingmachines
+    restart: always
+    ports:
+      - 3001:80
+    depends_on:
+      - stellawashingmachinesdb
+
+  stellabooking:
+    image: stellabooking
+    restart: always
+    ports:
+      - 3002:80
+    depends_on:
+      - stellabookingdb

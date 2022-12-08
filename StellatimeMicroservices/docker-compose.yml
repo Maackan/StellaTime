@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  
+  stellaauth:
+    image: maackan/stellaauth
+    restart: always
+    ports:
+      - 3000:80
+
+  stellawashingmachines:
+    image: maackan/stellawashingmachines
+    restart: always
+    ports:
+      - 3001:80
+
+  stellabooking:
+    image: maackan/stellabooking
+    restart: always
+    ports:
+      - 3002:80
