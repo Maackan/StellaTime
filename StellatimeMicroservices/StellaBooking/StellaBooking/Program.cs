@@ -20,7 +20,9 @@ builder.Services.AddHttpClient<WashingMachineClient>(client =>
     //client.BaseAddress = new Uri("http://localhost:5049");
 
     //client.BaseAddress = new Uri("https://stellawashingmachines"); // behöver inte ange portnummer för 443 är default på https.
-    client.BaseAddress = new Uri("http://stellawashingmachines"); // behöver inte ange portnummer för 80 är default på http.
+    //client.BaseAddress = new Uri("http://stellawashingmachines"); // behöver inte ange portnummer för 80 är default på http
+
+    client.BaseAddress = new Uri("https://stellawashingmachines-app--0f5edje.salmonbeach-f5b8da53.northeurope.azurecontainerapps.io"); // Denna är hämtad från ingress i container-app på azure
 });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
